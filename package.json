@@ -9,20 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.34",
+    "@ai-sdk/react": "^0.0.16",
+    "@pinecone-database/pinecone": "^2.2.2",
+    "ai": "^3.2.16",
+    "next": "14.2.4",
+    "openai": "^4.52.3",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.4"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "postcss": "^8",
-    "prettier": "2.8.8",
-    "prettier-plugin-tailwind": "2.2.12",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.4"
+    "eslint-config-next": "14.2.4",
+    "postcss": "^8",
+    "prettier": "3.3.2",
+    "prettier-plugin-tailwindcss": "0.6.5",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
