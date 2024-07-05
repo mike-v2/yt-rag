@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       includeMetadata: true,
     });
 
-    // Extract relevant context from Pinecone results
+    // Combine Pinecone results
     const context = queryResponse.matches
       .map((match) => match.metadata?.text)
       .filter(Boolean)
@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
       .join('\n\n');
     console.log('context: ', debugContext);
 
-    // Prepare messages for the chat model
     const chatMessages = [
       {
         role: 'system',
@@ -77,21 +76,19 @@ export async function POST(req: NextRequest) {
       ...messages,
     ];
 
-    // Call the language model with streaming
     const result = await streamText({
       model: openai('gpt-3.5-turbo'),
       messages: chatMessages,
       temperature: 0.2,
-      async onFinish({ text, usage, finishReason }) {
-        //console.log('Finished:', { text, usage, finishReason });
+      /* async onFinish({ text, usage, finishReason }) {
+        console.log('Finished:', { text, usage, finishReason });
         // Implement your own logic here, e.g. for storing messages or recording token usage
-      },
+      }, */
     });
 
-    // Respond with the stream
     return result.toAIStreamResponse();
   } catch (error) {
     console.error('Error:', error);
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }
