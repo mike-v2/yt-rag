@@ -7,7 +7,7 @@ import { Pinecone } from '@pinecone-database/pinecone';
 
 const openAiClient = new OpenAI();
 const pinecone = new Pinecone();
-const pcIndex = pinecone.index('openai');
+const pcIndex = pinecone.index('openai-1000');
 
 async function generateContextualQuery(messages: any[]) {
   const recentMessages = messages
@@ -29,7 +29,7 @@ async function generateContextualQuery(messages: any[]) {
           Generate a search query based on this conversation.`,
       },
     ],
-    temperature: 0.2,
+    temperature: 0,
   });
   return result.text;
 }
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     //TODO use relevance score and/or restrict max tokens
     const queryResponse = await pcIndex.query({
       vector: embedding,
-      topK: 5,
+      topK: 8,
       includeMetadata: true,
     });
 
