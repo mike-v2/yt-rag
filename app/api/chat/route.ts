@@ -16,7 +16,7 @@ async function generateContextualQuery(messages: any[]) {
     .join('\n');
 
   const result = await generateText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-3.5-turbo'),
     messages: [
       {
         role: 'system',
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     ];
 
     const result = await streamText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-3.5-turbo'),
       messages: chatMessages,
       temperature: 0.2,
       /* async onFinish({ text, usage, finishReason }) {
