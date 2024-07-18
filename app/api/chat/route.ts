@@ -14,8 +14,7 @@ const chatModel = 'gpt-4o-mini';
 const chatTemperature = 0.2;
 
 async function generateContextualQuery(messages: any[]) {
-  const recentMessages = messages
-    .slice(-3)
+  const joinedMessages = messages
     .map((m) => `${m.role}: ${m.content}`)
     .join('\n');
 
@@ -29,7 +28,7 @@ async function generateContextualQuery(messages: any[]) {
       },
       {
         role: 'user',
-        content: `Recent conversation:\n${recentMessages}\n\n
+        content: `Recent conversation:\n${joinedMessages}\n\n
           Generate a search query based on this conversation.`,
       },
     ],
@@ -41,8 +40,9 @@ async function generateContextualQuery(messages: any[]) {
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
+    const recentMessages = messages.slice(-4);
 
-    const contextualQuery = await generateContextualQuery(messages);
+    const contextualQuery = await generateContextualQuery(recentMessages);
 
     // Generate embedding for the user's message
     const embeddingResponse = await openAiClient.embeddings.create({
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         role: 'system',
         content: `${process.env.CHAT_INSTRUCTIONS} \n\n Context: ${context}`,
       },
-      ...messages,
+      ...recentMessages,
     ];
 
     const result = await streamText({
