@@ -8,6 +8,10 @@ import { Pinecone } from '@pinecone-database/pinecone';
 const openAiClient = new OpenAI();
 const pinecone = new Pinecone();
 const pcIndex = pinecone.index('openai-1000');
+const queryModel = 'gpt-4o-mini';
+const queryTemperature = 0;
+const chatModel = 'gpt-4o-mini';
+const chatTemperature = 0.2;
 
 async function generateContextualQuery(messages: any[]) {
   const recentMessages = messages
@@ -16,7 +20,7 @@ async function generateContextualQuery(messages: any[]) {
     .join('\n');
 
   const result = await generateText({
-    model: openai('gpt-3.5-turbo'),
+    model: openai(queryModel),
     messages: [
       {
         role: 'system',
@@ -29,7 +33,7 @@ async function generateContextualQuery(messages: any[]) {
           Generate a search query based on this conversation.`,
       },
     ],
-    temperature: 0,
+    temperature: queryTemperature,
   });
   return result.text;
 }
@@ -39,7 +43,6 @@ export async function POST(req: NextRequest) {
     const { messages } = await req.json();
 
     const contextualQuery = await generateContextualQuery(messages);
-    console.log('Contextual Query:', contextualQuery);
 
     // Generate embedding for the user's message
     const embeddingResponse = await openAiClient.embeddings.create({
@@ -62,12 +65,6 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .join('\n\n');
 
-    const debugContext = queryResponse.matches
-      .map((match) => (match.metadata?.text as string).substring(0, 1000))
-      .filter(Boolean)
-      .join('\n\n');
-    console.log('context: ', debugContext);
-
     const chatMessages = [
       {
         role: 'system',
@@ -77,9 +74,9 @@ export async function POST(req: NextRequest) {
     ];
 
     const result = await streamText({
-      model: openai('gpt-3.5-turbo'),
+      model: openai(chatModel),
       messages: chatMessages,
-      temperature: 0.2,
+      temperature: chatTemperature,
       /* async onFinish({ text, usage, finishReason }) {
         console.log('Finished:', { text, usage, finishReason });
         // Implement your own logic here, e.g. for storing messages or recording token usage
