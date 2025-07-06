@@ -21,12 +21,12 @@ export default function SourcesBar({
   return (
     <div className='border-b bg-gray-100 p-4'>
       <h2 className='mb-2 text-lg font-semibold'>Sources</h2>
-      <div className='flex gap-4 overflow-x-auto pb-2'>
+      <div className='flex gap-4 overflow-x-auto p-2'>
         {sources.map((source, index) => (
           <div key={index} className='flex-shrink-0'>
             <SourceCard
               source={source}
-              selected={selectedSource?.id === source.id}
+              selected={selectedSource?.video_id === source.video_id}
               onClick={() => setSelectedSource(source)}
             />
           </div>

@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { Source } from '@/types';
+import { twMerge } from 'tailwind-merge';
 
 interface SourceCardProps {
   source: Source;
@@ -19,11 +20,10 @@ export default function SourceCard({
 
   return (
     <div
-      className={`w-48 cursor-pointer rounded-lg border bg-white p-2 shadow-sm transition-all hover:shadow-md ${
-        selected
-          ? 'border-indigo-500 ring-2 ring-indigo-500'
-          : 'border-gray-200'
-      }`}
+      className={twMerge(
+        'w-48 cursor-pointer rounded-lg border bg-white p-2 shadow-sm transition-all hover:shadow-md',
+        selected && 'border-indigo-500 ring-2 ring-indigo-500',
+      )}
       onClick={onClick}
     >
       <div className='flex flex-col gap-2'>
