@@ -1,12 +1,13 @@
 'use client';
 
-import { useChatWithSources } from '@/hooks/useChatWithSources';
 import { useState } from 'react';
+
+import { useChatWithSources } from '@/hooks/useChatWithSources';
 import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
-import { Source } from '@/types/source';
 import SourceDetail from '@/components/SourceDetail';
 import LoadingIndicator from '@/components/LoadingIndicator';
+import { Source } from '@/types';
 
 export default function Chat() {
   const [useReasoner, setUseReasoner] = useState(false);

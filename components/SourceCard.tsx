@@ -1,6 +1,7 @@
 'use client';
 
-import { Source } from '@/types/source';
+import { format } from 'date-fns';
+import { Source } from '@/types';
 
 interface SourceCardProps {
   source: Source;
@@ -25,16 +26,20 @@ export default function SourceCard({
       }`}
       onClick={onClick}
     >
-      <div className='flex flex-col items-center gap-2'>
+      <div className='flex flex-col gap-2'>
         <img
           src={thumbnailUrl}
           alt={source.title}
-          className='h-20 w-full rounded-md object-cover'
+          className='h-24 w-full rounded-md object-cover'
         />
-        <div className='text-center'>
+        <div className='flex flex-col gap-1'>
           <p className='truncate text-xs font-semibold' title={source.title}>
             {source.title}
           </p>
+          <div className='text-xs text-gray-500'>
+            <p>{format(new Date(source.published_at), 'MMM d, yyyy')}</p>
+            <p>Similarity: {(source.score * 100).toFixed(2)}%</p>
+          </div>
         </div>
       </div>
     </div>
