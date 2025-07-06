@@ -2,17 +2,7 @@
 
 import { useState } from 'react';
 import YouTubePlayer from './YouTubePlayer';
-
-export interface Source {
-  id: string;
-  chunk_index: number;
-  published_at: string;
-  start_time: number;
-  text: string;
-  title: string;
-  video_id: string;
-  score: number;
-}
+import { Source } from '@/types';
 
 interface SourceCardProps {
   source: Source;

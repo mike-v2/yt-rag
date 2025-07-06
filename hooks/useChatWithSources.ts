@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useChat, type UseChatOptions } from 'ai/react';
-import { Source } from '@/components/SourceCard';
+import { Source } from '@/types';
 
 export const useChatWithSources = (options?: UseChatOptions) => {
   const { data, ...rest } = useChat(options);
