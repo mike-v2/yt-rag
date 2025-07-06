@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import {
-  generateText,
-  streamText,
-  StreamData,
-  StreamingTextResponse,
-} from 'ai';
+import { generateText, streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
@@ -84,9 +79,6 @@ export async function POST(req: NextRequest) {
       .filter(Boolean)
       .join('\n\n');
 
-    const data = new StreamData();
-    data.append(JSON.stringify({ sources }));
-
     const chatMessages = [
       {
         role: 'system',
@@ -99,13 +91,16 @@ export async function POST(req: NextRequest) {
       model: deepseek(model || 'deepseek-chat'),
       messages: chatMessages,
       temperature: chatTemperature,
-      onFinish: async (result) => {
-        console.log('closing data', result);
-        data.close();
-      },
     });
 
-    return new StreamingTextResponse(result.toAIStream(), {}, data);
+    const sourcesJson = JSON.stringify(sources);
+    const encodedSources = Buffer.from(sourcesJson).toString('base64');
+
+    return result.toAIStreamResponse({
+      headers: {
+        'X-Sources': encodedSources,
+      },
+    });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error }, { status: 500 });

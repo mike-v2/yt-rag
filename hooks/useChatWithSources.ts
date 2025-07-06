@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useChat, type UseChatOptions } from 'ai/react';
+import { useState } from 'react';
+import { useChat, type UseChatOptions, type Message } from 'ai/react';
 import { Source } from '@/types';
 
 export interface UseChatWithSourcesOptions extends UseChatOptions {
@@ -9,30 +9,56 @@ export interface UseChatWithSourcesOptions extends UseChatOptions {
 }
 
 export const useChatWithSources = (options?: UseChatWithSourcesOptions) => {
-  const { data, ...rest } = useChat({
+  const [sources, setSources] = useState<Source[]>([]);
+  const {
+    append: originalAppend,
+    reload: originalReload,
+    ...rest
+  } = useChat({
     ...options,
     body: {
       ...options?.body,
       model: options?.model,
     },
+    onResponse: (response) => {
+      options?.onResponse?.(response);
+      const sourcesHeader = response.headers.get('X-Sources');
+      if (sourcesHeader) {
+        const decodedSources = JSON.parse(atob(sourcesHeader));
+        setSources(decodedSources);
+      }
+    },
   });
 
-  const sources: Source[] = useMemo(() => {
-    if (!data) return [];
-    const lastMessage = data[data.length - 1];
-    if (typeof lastMessage === 'string') {
-      try {
-        const parsedData = JSON.parse(lastMessage);
-        return parsedData.sources || [];
-      } catch (error) {
-        return [];
-      }
-    }
-    return [];
-  }, [data]);
+  const append = async (
+    message: Message | Omit<Message, 'id'>,
+    chatRequestOptions?: {
+      options?: {
+        headers?: Record<string, string> | Headers;
+        body?: object;
+      };
+      functions?: any[];
+      function_call?: any;
+    },
+  ) => {
+    setSources([]);
+    return originalAppend(message, chatRequestOptions);
+  };
+
+  const reload = async (chatRequestOptions?: {
+    options?: {
+      headers?: Record<string, string> | Headers;
+      body?: object;
+    };
+  }) => {
+    setSources([]);
+    return originalReload(chatRequestOptions);
+  };
 
   return {
     sources,
+    append,
+    reload,
     ...rest,
   };
 }; 
