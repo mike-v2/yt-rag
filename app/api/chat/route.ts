@@ -29,12 +29,11 @@ async function generateContextualQuery(messages: any[]) {
       {
         role: 'system',
         content:
-          "Given the recent conversation, generate a detailed search query that captures the context and intent of the user's latest question. The query should be rich in relevant keywords and concepts.",
+          "Given the recent conversation, generate a detailed search query that captures the context and intent of the user's latest question. The query should be rich in relevant keywords and concepts. Only output the raw search query, without any surrounding text or explanation.",
       },
       {
         role: 'user',
-        content: `Recent conversation:\n${joinedMessages}\n\n
-          Generate a search query based on this conversation.`,
+        content: `Recent conversation:\n${joinedMessages}\n\nSearch query:`,
       },
     ],
     temperature: queryTemperature,
