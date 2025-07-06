@@ -7,14 +7,25 @@ import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
 import { Source } from '@/types/source';
 import SourceDetail from '@/components/SourceDetail';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 export default function Chat() {
   const [useReasoner, setUseReasoner] = useState(false);
   const [selectedSource, setSelectedSource] = useState<Source | null>(null);
-  const { messages, input, handleInputChange, handleSubmit, error, sources } =
-    useChatWithSources({
-      model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
-    });
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    error,
+    sources,
+    isLoading,
+  } = useChatWithSources({
+    model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+  });
+
+  const showLoadingIndicator =
+    isLoading && messages[messages.length - 1]?.role === 'user';
 
   return (
     <div className='grid h-screen grid-cols-12'>
@@ -37,6 +48,12 @@ export default function Chat() {
                 {m.content}
               </div>
             ))}
+            {showLoadingIndicator && (
+              <div className='whitespace-pre-wrap rounded-md border p-4'>
+                <span className='font-bold'>Caleb: </span>
+                <LoadingIndicator />
+              </div>
+            )}
           </div>
         </div>
 
