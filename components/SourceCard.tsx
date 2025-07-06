@@ -1,56 +1,42 @@
 'use client';
 
-import { useState } from 'react';
-import YouTubePlayer from './YouTubePlayer';
-import { Source } from '@/types';
+import { Source } from '@/types/source';
 
 interface SourceCardProps {
   source: Source;
+  onClick: () => void;
+  selected: boolean;
 }
 
-export default function SourceCard({ source }: SourceCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const formattedDate = new Date(source.published_at).toLocaleDateString(
-    'en-US',
-    {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    },
-  );
+export default function SourceCard({
+  source,
+  onClick,
+  selected,
+}: SourceCardProps) {
+  const videoId = source.video_id;
+  const thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 
   return (
-    <div className='rounded-lg border bg-white p-4 shadow-md'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
-          <div className='text-sm'>
-            <p className='font-semibold'>{source.title}</p>
-            <p className='text-gray-500'>Published: {formattedDate}</p>
-          </div>
-        </div>
-        <div className='flex items-center gap-2'>
-          <span className='inline-block rounded-full bg-gray-200 px-3 py-1 text-sm font-semibold text-gray-700'>
-            Similarity: {source.score.toFixed(3)}
-          </span>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='rounded-full bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700'
-          >
-            {isExpanded ? 'Hide Snippet' : 'Show Snippet'}
-          </button>
+    <div
+      className={`w-48 cursor-pointer rounded-lg border bg-white p-2 shadow-sm transition-all hover:shadow-md ${
+        selected
+          ? 'border-indigo-500 ring-2 ring-indigo-500'
+          : 'border-gray-200'
+      }`}
+      onClick={onClick}
+    >
+      <div className='flex flex-col items-center gap-2'>
+        <img
+          src={thumbnailUrl}
+          alt={source.title}
+          className='h-20 w-full rounded-md object-cover'
+        />
+        <div className='text-center'>
+          <p className='truncate text-xs font-semibold' title={source.title}>
+            {source.title}
+          </p>
         </div>
       </div>
-      {isExpanded && (
-        <div className='mt-4'>
-          <YouTubePlayer videoId={source.video_id} startTime={source.start_time} />
-          <div className='mt-4 rounded-lg border bg-gray-50 p-4'>
-            <p className='whitespace-pre-wrap font-mono text-sm'>
-              {source.text}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 
