@@ -2,10 +2,14 @@
 
 import { useChatWithSources } from '@/hooks/useChatWithSources';
 import SourceCard from '@/components/SourceCard';
+import { useState } from 'react';
 
 export default function Chat() {
+  const [useReasoner, setUseReasoner] = useState(false);
   const { messages, input, handleInputChange, handleSubmit, error, sources } =
-    useChatWithSources();
+    useChatWithSources({
+      model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+    });
 
   return (
     <div className='grid h-screen grid-cols-12'>
@@ -29,12 +33,27 @@ export default function Chat() {
         {error && <div>{error.message}</div>}
 
         <form onSubmit={handleSubmit} className='bg-white p-4'>
-          <input
-            className='w-full rounded border border-gray-300 p-2 shadow-xl'
-            value={input}
-            placeholder='Chat with Caleb...'
-            onChange={handleInputChange}
-          />
+          <div className='relative'>
+            <input
+              className='w-full rounded border border-gray-300 p-2 shadow-xl'
+              value={input}
+              placeholder='Chat with Caleb...'
+              onChange={handleInputChange}
+            />
+          </div>
+          <div className='mt-2 flex items-center'>
+            <button
+              type='button'
+              onClick={() => setUseReasoner(!useReasoner)}
+              className={`rounded-md px-3 py-1 text-sm transition-colors ${
+                useReasoner
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              DeepThink (R1)
+            </button>
+          </div>
         </form>
       </div>
 

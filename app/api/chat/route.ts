@@ -6,16 +6,21 @@ import {
   StreamData,
   StreamingTextResponse,
 } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
 
 const openAiClient = new OpenAI();
-const pinecone = new Pinecone();
+
+const deepseek = createOpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com/v1',
+});
+
+const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
 const pcIndex = pinecone.index('openai-1000');
-const queryModel = 'gpt-4o-mini';
+const queryModel = 'deepseek-chat';
 const queryTemperature = 0;
-const chatModel = 'gpt-4o-mini';
 const chatTemperature = 0.2;
 
 async function generateContextualQuery(messages: any[]) {
@@ -24,7 +29,7 @@ async function generateContextualQuery(messages: any[]) {
     .join('\n');
 
   const result = await generateText({
-    model: openai(queryModel),
+    model: deepseek(queryModel),
     messages: [
       {
         role: 'system',
@@ -39,15 +44,19 @@ async function generateContextualQuery(messages: any[]) {
     ],
     temperature: queryTemperature,
   });
+  console.log('Contextual query:', result.text);
   return result.text;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json();
+    const { messages, model } = await req.json();
     const recentMessages = messages.slice(-4);
 
-    const contextualQuery = await generateContextualQuery(recentMessages);
+    let contextualQuery = messages[messages.length - 1].content;
+    if (recentMessages.length > 1) {
+      contextualQuery = await generateContextualQuery(recentMessages);
+    }
 
     // Generate embedding for the user's message
     const embeddingResponse = await openAiClient.embeddings.create({
@@ -87,10 +96,11 @@ export async function POST(req: NextRequest) {
     ];
 
     const result = await streamText({
-      model: openai(chatModel),
+      model: deepseek(model || 'deepseek-chat'),
       messages: chatMessages,
       temperature: chatTemperature,
-      async onFinish() {
+      onFinish: async (result) => {
+        console.log('closing data', result);
         data.close();
       },
     });
