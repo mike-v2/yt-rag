@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { generateText, streamText } from 'ai';
+import {
+  generateText,
+  streamText,
+  StreamData,
+  StreamingTextResponse,
+} from 'ai';
 import { openai } from '@ai-sdk/openai';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
@@ -52,18 +57,26 @@ export async function POST(req: NextRequest) {
     const embedding = embeddingResponse.data[0].embedding;
 
     // Query Pinecone
-    //TODO use relevance score and/or restrict max tokens
     const queryResponse = await pcIndex.query({
       vector: embedding,
       topK: 8,
       includeMetadata: true,
     });
 
-    // Combine Pinecone results
-    const context = queryResponse.matches
-      .map((match) => match.metadata?.text)
+    const sources =
+      queryResponse.matches?.map((match) => ({
+        ...(match.metadata as object),
+        score: match.score,
+      })) ?? [];
+
+    // Combine Pinecone results for context
+    const context = sources
+      .map((source: any) => source.text)
       .filter(Boolean)
       .join('\n\n');
+
+    const data = new StreamData();
+    data.append(JSON.stringify({ sources }));
 
     const chatMessages = [
       {
@@ -77,13 +90,12 @@ export async function POST(req: NextRequest) {
       model: openai(chatModel),
       messages: chatMessages,
       temperature: chatTemperature,
-      /* async onFinish({ text, usage, finishReason }) {
-        console.log('Finished:', { text, usage, finishReason });
-        // Implement your own logic here, e.g. for storing messages or recording token usage
-      }, */
+      async onFinish() {
+        data.close();
+      },
     });
 
-    return result.toAIStreamResponse();
+    return new StreamingTextResponse(result.toAIStream(), {}, data);
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error }, { status: 500 });
