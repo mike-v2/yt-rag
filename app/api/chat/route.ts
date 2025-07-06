@@ -4,6 +4,10 @@ import { generateText, streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import OpenAI from 'openai';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { format } from 'date-fns';
+
+import { CHAT_INSTRUCTIONS } from '@/constants/prompts';
+import { Source } from '@/types';
 
 const openAiClient = new OpenAI();
 
@@ -66,22 +70,25 @@ export async function POST(req: NextRequest) {
       includeMetadata: true,
     });
 
-    const sources =
+    const sources: Source[] =
       queryResponse.matches?.map((match) => ({
-        ...(match.metadata as object),
-        score: match.score,
+        ...(match.metadata as Omit<Source, 'score'>),
+        score: match.score ?? 0,
       })) ?? [];
 
     // Combine Pinecone results for context
     const context = sources
-      .map((source: any) => source.text)
+      .map((source: Source) => {
+        const date = format(new Date(source.published_at), 'MMM d, yyyy');
+        return `Date: ${date}\nContent: ${source.text}`;
+      })
       .filter(Boolean)
-      .join('\n\n');
+      .join('\n\n---\n\n');
 
     const chatMessages = [
       {
         role: 'system',
-        content: `${process.env.CHAT_INSTRUCTIONS} \n\n Context: ${context}`,
+        content: `${CHAT_INSTRUCTIONS} \n\n Context: ${context}`,
       },
       ...recentMessages,
     ];
