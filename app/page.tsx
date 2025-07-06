@@ -1,7 +1,6 @@
 'use client';
 
 import { useChatWithSources } from '@/hooks/useChatWithSources';
-import SourceCard from '@/components/SourceCard';
 import { useState } from 'react';
 import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
@@ -68,10 +67,8 @@ export default function Chat() {
         />
       </div>
 
-      <div className='col-span-4 flex flex-col border-l bg-white'>
-        <div className='flex-grow overflow-y-auto p-6'>
-          <SourceDetail source={selectedSource} />
-        </div>
+      <div className='col-span-4 h-screen overflow-y-auto border-l p-6'>
+        <SourceDetail source={selectedSource} />
       </div>
     </div>
   );
