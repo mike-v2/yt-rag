@@ -12,6 +12,7 @@
     "@ai-sdk/openai": "^0.0.34",
     "@ai-sdk/react": "^0.0.16",
     "@pinecone-database/pinecone": "^2.2.2",
+    "@tailwindcss/typography": "^0.5.16",
     "ai": "^3.2.16",
     "date-fns": "^4.1.0",
     "next": "14.2.4",
