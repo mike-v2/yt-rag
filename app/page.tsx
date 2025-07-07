@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
 import { useChatWithSources } from '@/hooks/useChatWithSources';
 import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
@@ -45,7 +48,15 @@ export default function Chat() {
                 <span className='font-bold'>
                   {m.role === 'user' ? 'You: ' : 'Caleb: '}
                 </span>
-                {m.content}
+                <div className='max-w-none'>
+                  {m.role === 'user' ? (
+                    m.content
+                  ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {m.content}
+                    </ReactMarkdown>
+                  )}
+                </div>
               </div>
             ))}
             {showLoadingIndicator && (
