@@ -5,7 +5,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import { useChatWithSources } from '@/hooks/useChatWithSources';
+import { useChat } from 'ai/react';
 import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
 import SourceDetail from '@/components/SourceDetail';
@@ -21,11 +21,16 @@ export default function Chat() {
     handleInputChange,
     handleSubmit,
     error,
-    sources,
+    data,
     isLoading,
-  } = useChatWithSources({
-    model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+  } = useChat({
+    body: {
+      model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+    },
   });
+
+  const sourcesData = (data as any)?.find((d: any) => d.sources);
+  const sources = sourcesData?.sources ?? [];
 
   const showLoadingIndicator =
     isLoading && messages[messages.length - 1]?.role === 'user';
