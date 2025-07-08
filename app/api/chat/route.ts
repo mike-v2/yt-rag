@@ -6,6 +6,8 @@ import { searchSimilarContent } from '@/lib/vectorSearch';
 import { deepseek } from '@/lib/llm';
 import { CHAT_INSTRUCTIONS } from '@/constants/prompts';
 
+export const maxDuration = 60;
+
 const CHAT_TEMPERATURE = 0.2;
 
 export async function POST(req: NextRequest) {
@@ -14,8 +16,6 @@ export async function POST(req: NextRequest) {
   const data = new StreamData();
   const stream = new ReadableStream({
     async start(controller) {
-      const encoder = new TextEncoder();
-
       try {
         const recentMessages = messages.slice(-4);
 
