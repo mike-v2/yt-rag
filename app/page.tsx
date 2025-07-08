@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 
-import { useChatWithSources } from '@/hooks/useChatWithSources';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+import { useChat } from 'ai/react';
 import ChatInput from '@/components/ChatInput';
 import SourcesBar from '@/components/SourcesBar';
 import SourceDetail from '@/components/SourceDetail';
@@ -18,11 +21,16 @@ export default function Chat() {
     handleInputChange,
     handleSubmit,
     error,
-    sources,
+    data,
     isLoading,
-  } = useChatWithSources({
-    model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+  } = useChat({
+    body: {
+      model: useReasoner ? 'deepseek-reasoner' : 'deepseek-chat',
+    },
   });
+
+  const sourcesData = (data as any)?.find((d: any) => d.sources);
+  const sources = sourcesData?.sources ?? [];
 
   const showLoadingIndicator =
     isLoading && messages[messages.length - 1]?.role === 'user';
@@ -38,18 +46,23 @@ export default function Chat() {
         <div className='flex-grow overflow-y-auto p-8'>
           <div className='flex flex-col gap-4'>
             {messages.map((m) => (
-              <div
-                key={m.id}
-                className='whitespace-pre-wrap rounded-md border p-4'
-              >
+              <div key={m.id} className='prose rounded-md border p-4'>
                 <span className='font-bold'>
                   {m.role === 'user' ? 'You: ' : 'Caleb: '}
                 </span>
-                {m.content}
+                <span className='max-w-none'>
+                  {m.role === 'user' ? (
+                    m.content
+                  ) : (
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {m.content}
+                    </ReactMarkdown>
+                  )}
+                </span>
               </div>
             ))}
             {showLoadingIndicator && (
-              <div className='whitespace-pre-wrap rounded-md border p-4'>
+              <div className='rounded-md border p-4'>
                 <span className='font-bold'>Caleb: </span>
                 <LoadingIndicator />
               </div>
