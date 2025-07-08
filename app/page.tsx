@@ -46,11 +46,14 @@ export default function Chat() {
         <div className='flex-grow overflow-y-auto p-8'>
           <div className='flex flex-col gap-4'>
             {messages.map((m) => (
-              <div key={m.id} className='prose rounded-md border p-4'>
+              <div
+                key={m.id}
+                className='prose max-w-none rounded-md border p-4'
+              >
                 <span className='font-bold'>
                   {m.role === 'user' ? 'You: ' : 'Caleb: '}
                 </span>
-                <span className='max-w-none'>
+                <span>
                   {m.role === 'user' ? (
                     m.content
                   ) : (
