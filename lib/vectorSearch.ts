@@ -1,31 +1,49 @@
-import { Pinecone } from '@pinecone-database/pinecone';
-import OpenAI from 'openai';
+import pinecone from '@/config/pinecone';
 import { Source } from '@/types';
 
-const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
-const pcIndex = pinecone.index('openai-1000');
+const pineconeIndex = pinecone.index(
+  process.env.PINECONE_INDEX!,
+  process.env.PINECONE_HOST!,
+);
+const namespace = pineconeIndex.namespace('default');
 
-const openAiClient = new OpenAI();
-
-export async function searchSimilarContent(query: string): Promise<Source[]> {
-  // Generate embedding for the query
-  const embeddingResponse = await openAiClient.embeddings.create({
-    model: 'text-embedding-3-small',
-    input: query,
-  });
-  const embedding = embeddingResponse.data[0].embedding;
-
-  // Search Pinecone with the embedding
-  const queryResponse = await pcIndex.query({
-    vector: embedding,
-    topK: 8,
-    includeMetadata: true,
-  });
-
-  return queryResponse.matches?.map((match) => ({
-    ...(match.metadata as Omit<Source, 'score'>),
-    score: match.score ?? 0,
-  })) ?? [];
+interface PineconeHit {
+  _id: string;
+  _score: number;
+  fields: Omit<Source, 'score'>;
 }
 
-export { pcIndex }; 
+interface PineconeSearchResponse {
+  result?: PineconeSearchResult;
+}
+
+interface PineconeSearchResult {
+  hits?: PineconeHit[];
+}
+
+export async function searchSimilarContent(query: string): Promise<Source[]> {
+  try {
+    const searchResponse = await namespace.searchRecords({
+      query: {
+        topK: 15,
+        inputs: { text: query },
+      },
+      fields: ['*'], // Request all metadata fields
+    });
+
+    const results = (
+      searchResponse as PineconeSearchResponse
+    )?.result?.hits?.map((hit: PineconeHit) => ({
+      ...hit.fields,
+      score: hit._score,
+    }));
+    if (!results) {
+      throw new Error('Search failed');
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error in searchSimilarContent:', error);
+    return [];
+  }
+}
