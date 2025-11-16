@@ -13,6 +13,7 @@
     "@ai-sdk/react": "^0.0.16",
     "@pinecone-database/pinecone": "^6.1.1",
     "@tailwindcss/typography": "^0.5.16",
+    "@vercel/analytics": "^1.5.0",
     "ai": "^3.2.16",
     "date-fns": "^4.1.0",
     "next": "14.2.4",
